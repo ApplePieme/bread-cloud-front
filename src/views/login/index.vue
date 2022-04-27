@@ -53,21 +53,20 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
 
 export default {
   name: 'Login',
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('请输入用户名'))
+      if (value.trim().length === 0) {
+        callback(new Error('请输入用户名或手机号'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码不能少于6位'))
+      if (value.length < 8) {
+        callback(new Error('请输入8位以上的密码'))
       } else {
         callback()
       }
@@ -177,7 +176,7 @@ $cursor: #000;
 
 <style lang="scss" scoped>
 $bg:#2d3a4b;
-$dark_gray:#889aa4;
+$dark_gray:#fff;
 $light_gray:#000;
 
 .login-container {

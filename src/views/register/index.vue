@@ -1,6 +1,6 @@
 <template>
-  <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+  <div class="register-container">
+    <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="register-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
         <h3 class="title">欢迎注册面包云</h3>
@@ -21,21 +21,6 @@
         />
       </el-form-item>
 
-      <el-form-item prop="phone">
-        <span class="svg-container">
-          <svg-icon icon-class="phone" />
-        </span>
-        <el-input
-          ref="phone"
-          v-model="registerForm.phone"
-          placeholder="手机号"
-          name="phone"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
-        />
-      </el-form-item>
-
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
@@ -49,7 +34,6 @@
           name="password"
           tabindex="2"
           auto-complete="on"
-          @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
@@ -61,22 +45,36 @@
           <svg-icon icon-class="password" />
         </span>
         <el-input
-          :key="passwordType"
+          :key="confirmPasswordType"
           ref="confirmPassword"
-          v-model="confirmPassword"
-          :type="passwordType"
+          v-model="registerForm.confirmPassword"
+          :type="confirmPasswordType"
           placeholder="确认密码"
           name="confirmPassword"
-          tabindex="2"
+          tabindex="3"
           auto-complete="on"
-          @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showConPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          <svg-icon :icon-class="confirmPasswordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">注册</el-button>
+      <el-form-item prop="phone">
+        <span class="svg-container">
+          <svg-icon icon-class="phone" />
+        </span>
+        <el-input
+          ref="phone"
+          v-model="registerForm.phone"
+          placeholder="手机号"
+          name="phone"
+          type="text"
+          tabindex="4"
+          auto-complete="on"
+        />
+      </el-form-item>
+
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleRegister">注册</el-button>
 
       <div class="tips">
         <span style="margin-right:250px;">已有账号？<el-link type="primary" @click.native.prevent="login">马上登录</el-link></span>
@@ -88,20 +86,39 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import { register } from '@/api/user'
 
 export default {
   name: 'Register',
   data() {
     const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+      if (value.trim().length === 0) {
+        callback(new Error('请输入用户名'))
+      } else if (!/^[A-Za-z0-9]+$/.test(value)) {
+        callback(new Error('请输入字母和数字的组合'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (value.length < 8) {
+        callback(new Error('请输入8位以上的密码'))
+      } else {
+        callback()
+      }
+    }
+    const validateConfirmPassword = (rule, value, callback) => {
+      if (value.length < 8) {
+        callback(new Error('请输入8位以上的密码'))
+      } else if (value != this.registerForm.password) {
+        callback(new Error('两次输入的密码不一致'))
+      } else {
+        callback()
+      }
+    }
+    const validatePhone = (rule, value, callback) => {
+      if (!/^1[3-9]\d{9}$/.test(value)) {
+        callback(new Error('请输入正确的手机号'))
       } else {
         callback()
       }
@@ -110,15 +127,18 @@ export default {
       registerForm: {
         username: '',
         password: '',
+        confirmPassword: '',
         phone: ''
       },
-      confirmPassword: '',
-      loginRules: {
+      registerRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+        confirmPassword: [{ required: true, trigger: 'blur', validator: validateConfirmPassword }],
+        phone: [{ required: true, trigger: 'blur', validator: validatePhone }]
       },
       loading: false,
       passwordType: 'password',
+      confirmPasswordType: 'password',
       redirect: undefined
     }
   },
@@ -145,30 +165,20 @@ export default {
       })
     },
     showConPwd() {
-      if (this.passwordType === 'password') {
-        this.passwordType = ''
+      if (this.confirmPasswordType === 'password') {
+        this.confirmPasswordType = ''
       } else {
-        this.passwordType = 'password'
+        this.confirmPasswordType = 'password'
       }
       this.$nextTick(() => {
         this.$refs.confirmPassword.focus()
       })
     },
-    handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: this.redirect || '/' })
-            this.loading = false
-          }).catch(() => {
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+    handleRegister() {
+      register(this.registerForm).then(res => {
+          this.loading = false
+          this.$router.push({path: '/login'})
+        })
     }
   }
 }
@@ -183,13 +193,13 @@ $light_gray:#fff;
 $cursor: #000;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-  .login-container .el-input input {
+  .register-container .el-input input {
     color: $cursor;
   }
 }
 
 /* reset element-ui css */
-.login-container {
+.register-container {
   .el-input {
     display: inline-block;
     height: 47px;
@@ -223,17 +233,17 @@ $cursor: #000;
 
 <style lang="scss" scoped>
 $bg:#2d3a4b;
-$dark_gray:#889aa4;
+$dark_gray:#fff;
 $light_gray:#000;
 
-.login-container {
+.register-container {
   min-height: 100%;
   width: 100%;
   background-image: url('../../assets/login_and_register_images/login_bg.jpg');
   background-size: cover;
   overflow: hidden;
 
-  .login-form {
+  .register-form {
     position: relative;
     width: 520px;
     max-width: 100%;
