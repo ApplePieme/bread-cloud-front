@@ -60,14 +60,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入用户名'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码不能少于6位'))
       } else {
         callback()
       }
@@ -183,7 +183,7 @@ $light_gray:#000;
 .login-container {
   min-height: 100%;
   width: 100%;
-  background-image: url('../../assets/login_images/login_bg.jpg');
+  background-image: url('../../assets/login_and_register_images/login_bg.jpg');
   background-size: cover;
   overflow: hidden;
 

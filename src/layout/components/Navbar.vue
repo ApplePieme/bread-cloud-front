@@ -1,18 +1,16 @@
 <template>
   <div class="navbar">
-    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
-
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
       <div style="heigh:100px;float:left;margin-right:30px;">
         <el-button type="primary" size="mini" round @click="dialogVisible = true">上传文件</el-button>
-        <el-button type="primary" size="mini" round>新建文件夹</el-button>
+        <el-button type="primary" size="mini" round>新建目录</el-button>
       </div>
       <el-dropdown class="avatar-container" trigger="click">
         
         <div class="avatar-wrapper">
-          <img src="../../assets/avatar_images/1.jpg" class="user-avatar">
+          <img src="https://bread-cloud.oss-cn-beijing.aliyuncs.com/avatar/default.png" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
@@ -55,7 +53,6 @@
 <script>
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
 
 export default {
   data() {
@@ -64,8 +61,7 @@ export default {
     }
   },
   components: {
-    Breadcrumb,
-    Hamburger
+    Breadcrumb
   },
   computed: {
     ...mapGetters([
@@ -74,9 +70,6 @@ export default {
     ])
   },
   methods: {
-    toggleSideBar() {
-      this.$store.dispatch('app/toggleSideBar')
-    },
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)

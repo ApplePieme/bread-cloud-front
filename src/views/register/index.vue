@@ -229,7 +229,7 @@ $light_gray:#000;
 .login-container {
   min-height: 100%;
   width: 100%;
-  background-image: url('../../assets/login_images/login_bg.jpg');
+  background-image: url('../../assets/login_and_register_images/login_bg.jpg');
   background-size: cover;
   overflow: hidden;
 
