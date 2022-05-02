@@ -35,6 +35,27 @@ export const constantRoutes = [
         name: 'Index',
         component: () => import('@/views/index/index'),
         meta: { title: '全部文件', icon: 'menu-dir' }
+      },
+      {
+        path: 'index',
+        name: 'Index',
+        component: () => import('@/views/index/index'),
+        meta: { title: '学习资料', icon: 'menu-dir' },
+        hidden: true
+      }
+    ]
+  },
+
+  {
+    path: '/transfer',
+    component: Layout,
+    redirect: '/transfer',
+    children: [
+      {
+        path: 'transfer',
+        name: 'transfer',
+        component: () => import('@/views/transfer/index'),
+        meta: { title: '传输记录', icon: 'transfer-record' }
       }
     ]
   },
