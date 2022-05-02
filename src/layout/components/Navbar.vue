@@ -48,7 +48,8 @@
       <div align=center style="margin-bottom: 30px;">
         <el-upload
           class="avatar-uploader"
-          action="https://jsonplaceholder.typicode.com/posts/"
+          :action="uploadUrl"
+          :headers="uploadHeaders"
           :show-file-list="false"
           :on-success="handleAvatarSuccess">
           <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar">
@@ -142,6 +143,10 @@ export default {
       }
     }
     return {
+      uploadUrl: process.env.VUE_APP_BASE_API + '/user/upload/avatar',
+      uploadHeaders: {
+        token: ''
+      },
       dialogUploadVisible: false,
       dialogInfoVisible: false,
       dialogPasswordVisible: false,
@@ -234,8 +239,16 @@ export default {
         }
       })
     },
-    handleAvatarSuccess() {
-      
+    handleAvatarSuccess(res) {
+      if (res.data.url === null || res.data.url.trim().length === 0) {
+        Message({
+          message: '上传头像失败, 请稍后重试',
+          type: 'error',
+          duration: 5 * 1000
+        })
+      } else {
+        this.userInfo.avatar = res.data.url
+      }
     },
     openModifiedPasswordDialog() {
       getRsa().then(res => {
@@ -267,6 +280,7 @@ export default {
         this.userInfo.phone = res.data.user.phone
       })
       this.userInfo.avatar = this.avatar
+      this.uploadHeaders.token = this.token
       this.dialogInfoVisible = true
     },
     toggleSideBar() {
