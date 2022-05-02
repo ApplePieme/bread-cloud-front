@@ -53,6 +53,8 @@
 </template>
 
 <script>
+import JSEncrypt from 'jsencrypt'
+import { getRsa } from '@/api/user'
 
 export default {
   name: 'Login',
@@ -76,13 +78,18 @@ export default {
         username: '',
         password: ''
       },
+      form: {
+        username: '',
+        password: ''
+      },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      rsa: ''
     }
   },
   watch: {
@@ -92,6 +99,11 @@ export default {
       },
       immediate: true
     }
+  },
+  created() {
+    getRsa().then(res => {
+      this.rsa = res.data.rsa
+    })
   },
   methods: {
     register() {
@@ -108,10 +120,14 @@ export default {
       })
     },
     handleLogin() {
+      let encryptor = new JSEncrypt()
+      encryptor.setPublicKey(this.rsa)
+      this.form.password = encryptor.encrypt(this.loginForm.password)
+      this.form.username = this.loginForm.username
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
+          this.$store.dispatch('user/login', this.form).then(() => {
             this.$router.push({ path: '/' })
             this.loading = false
           }).catch(() => {

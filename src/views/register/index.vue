@@ -85,8 +85,9 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
-import { register } from '@/api/user'
+import { validPhone } from '@/utils/validate'
+import { register, getRsa } from '@/api/user'
+import JSEncrypt from 'jsencrypt'
 
 export default {
   name: 'Register',
@@ -117,7 +118,7 @@ export default {
       }
     }
     const validatePhone = (rule, value, callback) => {
-      if (!/^1[3-9]\d{9}$/.test(value)) {
+      if (!validPhone(value)) {
         callback(new Error('请输入正确的手机号'))
       } else {
         callback()
@@ -130,6 +131,11 @@ export default {
         confirmPassword: '',
         phone: ''
       },
+      form: {
+        username: '',
+        password: '',
+        phone: ''
+      },
       registerRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         password: [{ required: true, trigger: 'blur', validator: validatePassword }],
@@ -139,7 +145,8 @@ export default {
       loading: false,
       passwordType: 'password',
       confirmPasswordType: 'password',
-      redirect: undefined
+      redirect: undefined,
+      rsa: ''
     }
   },
   watch: {
@@ -149,6 +156,11 @@ export default {
       },
       immediate: true
     }
+  },
+  created() {
+    getRsa().then(res => {
+      this.rsa = res.data.rsa
+    })
   },
   methods: {
     login() {
@@ -175,10 +187,23 @@ export default {
       })
     },
     handleRegister() {
-      register(this.registerForm).then(res => {
+      let encryptor = new JSEncrypt()
+      encryptor.setPublicKey(this.rsa)
+      this.form.password = encryptor.encrypt(this.registerForm.password)
+      this.form.username = this.registerForm.username
+      this.form.phone = this.registerForm.phone
+      this.$refs.registerForm.validate(valid => {
+      if (valid) {
+        this.loading = true
+        register(this.form).then(res => {
           this.loading = false
           this.$router.push({path: '/login'})
         })
+      } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
     }
   }
 }

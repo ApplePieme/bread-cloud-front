@@ -24,9 +24,33 @@ export function getInfo(token) {
   })
 }
 
-export function logout() {
+export function logout(token) {
   return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
+    url: '/logout',
+    method: 'get',
+    params: { token }
+  })
+}
+
+export function modifiedInfo(data) {
+  return request({
+    url: '/user/info/modified',
+    method: 'post',
+    data
+  })
+}
+
+export function getRsa() {
+  return request({
+    url: '/rsa',
+    method: 'get'
+  })
+}
+
+export function modifiedPassword(data) {
+  return request({
+    url: '/user/password/modified',
+    method: 'post',
+    data
   })
 }
